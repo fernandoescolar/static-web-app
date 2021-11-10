@@ -1,16 +1,14 @@
-doctype html
-html(lang="en")
-  head
-    title Search
-    link(rel='stylesheet', href='/main.css')
-    script(src='/main.js', defer='')
-  body
-    h1 Search
-    div.container
-      p
-        this is a searcher
-      a(href='/') Back Home
-      form(action='/search.html', method='get')
-        input(id='query', type='text', placeholder='Search')
-        input(id='search', type='button', value='Search')
-      #result
+extends ../includes/layout.pug
+
+block content
+  h1 Search
+  div.container
+    p
+      this is a searcher
+    a(href='/') Back Home
+    //+search-form
+    form(action='/search.html' method='get')
+      input(id='query' type='text' placeholder='Search')
+      input(id='search' type='button' value='Search')
+    #result
+  script(src='../js/search.js')

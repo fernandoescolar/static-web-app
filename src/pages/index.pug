@@ -1,16 +1,13 @@
-doctype html
-html(lang="en")
-  head
-    title My first pug page
-    link(rel='stylesheet', href='main.css')
-  body
-    h1 Pug - node template engine
-    #container.col
-      if youAreUsingPug
-        p You are amazing
-      else
-        p Get on it! :D
-      p
-        Pug is a terse and simple templating language with a
-        strong focus on performance and powerful features.
-        a(href="search.html") Go to search
+extends ../includes/layout.pug
+
+block content
+  h1 Pug - node template engine
+  #container.col
+    if youAreUsingPug
+      p You are amazing
+    else
+      p Get on it! :D
+    p
+      Pug is a terse and simple templating language with a
+      strong focus on performance and powerful features.
+      a(href="search.html") Go to search

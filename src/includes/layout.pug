@@ -1,0 +1,24 @@
+include ./_head.pug
+include ./_header.pug
+include ./_footer.pug
+
+doctype html
+html(lang=language)
+  head
+    block head
+      +head()
+
+  body
+    .page.js-page
+
+      block header
+        +header()
+
+      main.main
+        .main__wrapper
+          block content
+
+      block footer
+        +footer()
+
+//script(src='../js/main.js')

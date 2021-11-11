@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "rimraf dist && webpack --watch --mode development",
-    "build": "rimraf dist && webpack --mode development",
-    "production": "rimraf dist && webpack --mode production",
+    "build": "rimraf dist && webpack --mode production",
     "start": "rimraf dist && webpack --mode development && swa start dist --api-location api"
   },
   "keywords": [

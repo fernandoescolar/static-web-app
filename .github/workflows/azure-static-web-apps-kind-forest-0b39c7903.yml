@@ -10,10 +10,38 @@ on:
       - main
 
 jobs:
+  iac:
+    runs-on: ubuntu-latest
+    name: Create Infrasctructure
+    steps:
+    - name: Azure Login
+      id: login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Azure Resources
+      id: deploy
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.0.72
+        inlineScript: |
+          subscription=${{ secrets.AZURE_SUBSCRIPTION }}
+          resourcegroup=StaticWebApp
+          staticwebapp=FerStatic
+
+          az rest --method put --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp?api-version=2020-06-01 --body "{\"location\": \"westeurope\", \"sku\": { \"name\": \"Free\", \"tier\": \"Free\" }, \"properties\": {}}"
+          az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/resetapikey?api-version=2020-06-01 --body "{\"location\": \"westeurope\", \"properties\": {}}"
+          deployment_token=$(az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/listsecrets?api-version=2020-06-01 | jq '.properties.apiKey' | tr -d '"')
+          echo "::set-output name=deployment_token::$deployment_token"
+    outputs:
+      deployment_token: ${{ steps.deploy.outputs.deployment_token }}
+
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    needs: iac
     steps:
       - uses: actions/checkout@v2
         with:
@@ -22,21 +50,8 @@ jobs:
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_FOREST_0B39C7903 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          azure_static_web_apps_api_token: ${{ needs.iac.outputs.deployment_token }}
           action: "upload"
           app_location: "." # App source code path
           api_location: "api" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_FOREST_0B39C7903 }}
-          action: "close"

@@ -22,18 +22,14 @@ jobs:
 
     - name: Deploy Azure Resources
       id: deploy
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.0.72
-        inlineScript: |
-          subscription=${{ secrets.AZURE_SUBSCRIPTION }}
-          resourcegroup=StaticWebApp
-          staticwebapp=FerStatic
-
-          az rest --method put --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp?api-version=2020-06-01 --body "{{\"location\": \"westeurope\", \"sku\": {{ \"name\": \"Free\", \"tier\": \"Free\" }}, \"properties\": {{}}}}"
-          az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/resetapikey?api-version=2020-06-01 --body "{{\"location\": \"westeurope\", \"properties\": {{}}}}"
-          deployment_token=$(az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/listsecrets?api-version=2020-06-01 | jq '.properties.apiKey' | tr -d '"')
-          echo "::set-output name=deployment_token::$deployment_token"
+      run: |
+        subscription=${{ secrets.AZURE_SUBSCRIPTION }}
+        resourcegroup=StaticWebApp
+        staticwebapp=FerStatic
+        az rest --method put --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp?api-version=2020-06-01 --body "{\"location\": \"westeurope\", \"sku\": { \"name\": \"Free\", \"tier\": \"Free\" }, \"properties\": {}}"
+        az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/resetapikey?api-version=2020-06-01 --body "{\"location\": \"westeurope\", \"properties\": {}}"
+        deployment_token=$(az rest --method post --url /subscriptions/$subscription/resourcegroups/$resourcegroup/providers/Microsoft.Web/staticSites/$staticwebapp/listsecrets?api-version=2020-06-01 | jq '.properties.apiKey' | tr -d '"')
+        echo "::set-output name=deployment_token::$deployment_token"
     outputs:
       deployment_token: ${{ steps.deploy.outputs.deployment_token }}
 
